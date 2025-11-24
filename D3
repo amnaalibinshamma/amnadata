@@ -1,0 +1,202 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "\n",
+    "# Load Air Quality & Urban Lifestyle Dataset\n",
+    "df = pd.read_csv(\"air_quality_lifestyle_dataset.csv\")\n",
+    "\n",
+    "# Features selected for ML (Air pollutants + lifestyle factors)\n",
+    "feature_cols = [\n",
+    "    \"pm25\", \"pm10\", \"no2\", \"so2\", \"co\", \"o3\",\n",
+    "    \"commuting_time\", \"daily_steps\", \"physical_activity_min\",\n",
+    "    \"stress_level\", \"age\"\n",
+    "]\n",
+    "\n",
+    "X = df[feature_cols].values\n",
+    "y = df[\"health_risk\"].values   # target variable\n",
+    "\n",
+    "# 75% training, 25% testing\n",
+    "X_train, X_test, y_train, y_test = train_test_split(\n",
+    "    X, y, test_size=0.25, random_state=0\n",
+    ")\n",
+    "\n",
+    "# Standardize Data\n",
+    "sc = StandardScaler()\n",
+    "X_train = sc.fit_transform(X_train)\n",
+    "X_test  = sc.transform(X_test)\n"
+   ]
+  },
+
+  <!-- LOGISTIC REGRESSION -->
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.linear_model import LogisticRegression\n",
+    "from sklearn.metrics import confusion_matrix, accuracy_score\n",
+    "\n",
+    "log_model = LogisticRegression(random_state=0, max_iter=1000)\n",
+    "log_model.fit(X_train, y_train)\n",
+    "log_pred = log_model.predict(X_test)\n",
+    "\n",
+    "print(confusion_matrix(y_test, log_pred))\n",
+    "print(\"Accuracy (Logistic):\", accuracy_score(y_test, log_pred))"
+   ]
+  },
+
+  <!-- KNN MODEL -->
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.neighbors import KNeighborsClassifier\n",
+    "from sklearn.metrics import confusion_matrix, accuracy_score\n",
+    "\n",
+    "knn_model = KNeighborsClassifier(n_neighbors=5, metric=\"minkowski\", p=2)\n",
+    "knn_model.fit(X_train, y_train)\n",
+    "knn_pred = knn_model.predict(X_test)\n",
+    "\n",
+    "print(confusion_matrix(y_test, knn_pred))\n",
+    "print(\"Accuracy (KNN):\", accuracy_score(y_test, knn_pred))"
+   ]
+  },
+
+  <!-- NAIVE BAYES -->
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.naive_bayes import GaussianNB\n",
+    "from sklearn.metrics import confusion_matrix, accuracy_score\n",
+    "\n",
+    "nb_model = GaussianNB()\n",
+    "nb_model.fit(X_train, y_train)\n",
+    "nb_pred = nb_model.predict(X_test)\n",
+    "\n",
+    "print(confusion_matrix(y_test, nb_pred))\n",
+    "print(\"Accuracy (Naive Bayes):\", accuracy_score(y_test, nb_pred))"
+   ]
+  },
+
+  <!-- DECISION TREE -->
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.tree import DecisionTreeClassifier\n",
+    "from sklearn.metrics import confusion_matrix, accuracy_score\n",
+    "\n",
+    "dt_model = DecisionTreeClassifier(criterion=\"entropy\", random_state=0)\n",
+    "dt_model.fit(X_train, y_train)\n",
+    "dt_pred = dt_model.predict(X_test)\n",
+    "\n",
+    "print(confusion_matrix(y_test, dt_pred))\n",
+    "print(\"Accuracy (Decision Tree):\", accuracy_score(y_test, dt_pred))"
+   ]
+  },
+
+  <!-- MODEL COMPARISON -->
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "models = {\n",
+    "    \"Logistic Regression\": log_model,\n",
+    "    \"KNN\": knn_model,\n",
+    "    \"Naive Bayes\": nb_model,\n",
+    "    \"Decision Tree\": dt_model\n",
+    "}\n",
+    "\n",
+    "for name, model in models.items():\n",
+    "    pred = model.predict(X_test)\n",
+    "    cm = confusion_matrix(y_test, pred)\n",
+    "    acc = accuracy_score(y_test, pred)\n",
+    "    print(f\"{name} | Accuracy = {acc:.4f}\")\n",
+    "    print(cm, \"\\n\")"
+   ]
+  },
+
+  <!-- K-MEANS CLUSTERING -->
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.cluster import KMeans\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "\n",
+    "Xc = StandardScaler().fit_transform(df[feature_cols].values)\n",
+    "\n",
+    "kmeans = KMeans(n_clusters=3, random_state=0, n_init=10)\n",
+    "labels_km = kmeans.fit_predict(Xc)\n",
+    "\n",
+    "print(\"KMeans centers (scaled):\\n\", kmeans.cluster_centers_)\n",
+    "print(\"KMeans labels (first 20):\", labels_km[:20])"
+   ]
+  },
+
+  <!-- AGGLOMERATIVE CLUSTERING -->
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.cluster import AgglomerativeClustering\n",
+    "from sklearn.decomposition import PCA\n",
+    "\n",
+    "subset_size = 5000\n",
+    "_, X_sub, _, y_sub = train_test_split(\n",
+    "    df[feature_cols].values,\n",
+    "    df[\"health_risk\"].values,\n",
+    "    test_size=subset_size/len(df),\n",
+    "    random_state=0,\n",
+    "    stratify=df[\"health_risk\"].values\n",
+    ")\n",
+    "\n",
+    "Xc_sub = StandardScaler().fit_transform(X_sub)\n",
+    "Xc_sub_pca = PCA(n_components=3, random_state=0).fit_transform(Xc_sub)\n",
+    "\n",
+    "agg = AgglomerativeClustering(n_clusters=3, linkage=\"ward\")\n",
+    "labels_ag = agg.fit_predict(Xc_sub_pca)\n",
+    "\n",
+    "print(\"Agglomerative labels (first 20):\", labels_ag[:20])"
+   ]
+  }
+ ],
+
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python",
+   "version": "3.13.5"
+  }
+ },
+
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
