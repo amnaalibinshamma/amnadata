@@ -1,0 +1,14 @@
+def descriptive_stats(df, column):
+    stats = {
+        "Mean": df[column].mean(),
+        "Median": df[column].median(),
+        "Mode": df[column].mode()[0],
+        "Std Dev": df[column].std(),
+        "Min": df[column].min(),
+        "Max": df[column].max(),
+        "Skewness": df[column].skew(),
+        "Kurtosis": df[column].kurt()
+    }
+    return stats
+
+descriptive_stats(df, "pm25")
